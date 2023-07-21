@@ -34,18 +34,37 @@ class FrequencyGenerator:
         return waveform + noise
 
 
+def default_amplitude_func(t):
+    return 3 + 0.25*t
+
+
+def generate_waveform(
+        amplitude_func=default_amplitude_func,
+        sampling_rate=100,
+        frequency_Hz=1,
+        duration_s=10,
+        noise_amplitude=0.3
+):
+    frequency_gen = FrequencyGenerator(
+        amplitude_func,
+        sampling_rate,
+        frequency_Hz,
+        duration_s,
+        noise_amplitude
+    )
+    return frequency_gen.generate_waveform()
+
+
 if __name__ == "__main__":
     def amplitude_func(t):
         return 3 + 0.25*t
-    frequency_gen = FrequencyGenerator(
+    waveform = generate_waveform(
         amplitude_func=amplitude_func,
         sampling_rate=100,
         frequency_Hz=1,
         duration_s=10,
         noise_amplitude=0.3
     )
-
-    waveform = frequency_gen.generate_waveform()
 
     plt.plot(waveform)
     plt.show()
