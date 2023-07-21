@@ -1,5 +1,5 @@
 import os
-from project_manager.config import Config
+from dsp_toolbox.project_manager.config import Config
 
 
 def main():
