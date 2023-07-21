@@ -1,0 +1,27 @@
+controller:
+  initial_gains:
+    kp: 10
+    ki: 1
+    kd: 0
+  gain_limits:
+    kp:
+      lower: 0
+      upper: 100
+    ki:
+      lower: 0
+      upper: 10
+    kd:
+      lower: 0
+      upper: 0
+plotting:
+  title: "Here's a sample title"
+  small_font: 12
+  med_font: 16
+  large_font: 20
+log:
+  directory: data/logs/
+  file_name: '{name}-{date:%Y-%m-%d}.log'
+  format: '%(asctime)s [%(name)s, %(filename)s:%(lineno)d] %(message)s'
+  level: 10
+  name: LoggerName
+  suffix: '%Y-%m-%d'
