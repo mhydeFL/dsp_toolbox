@@ -56,9 +56,9 @@ class HeaterModel:
 
 
 def main():
-    from dsp_toolbox.optimization.oscillation_checker import calculate_period, check_oscillation_stability
+    from dsp_toolbox.optimization.oscillation_checker import calculate_period, check_oscillation_stability, find_region_of_interest
     pid = PIDController(
-        kp=5.0,
+        kp=4.2,
         ki=0.0,
         kd=0.0,
         output_limits=[0, 5]
@@ -67,7 +67,8 @@ def main():
         controller=pid,
         update_interval_s=0.1
     )
-    controller.setpoint(28)
+    setpoint = 28
+    controller.setpoint(setpoint)
     
     Kh = 3.5
     theta_t = 22
@@ -88,14 +89,14 @@ def main():
         Tout[k+1] = Tout[k] + (Ts/theta_t) * (-Tout[k] + Kh*u[int(k-theta_d/Ts)] + Tenv)
         print("t = %2.1f, u = %3.2f, Tout = %3.1f" %(t[k], u[k], Tout[k+1]))
     
-    roi = Tout[1000:]
-    
     plt.plot(Tout)
     plt.show()
     
-    period = calculate_period(roi, 10)
+    starting_idx = find_region_of_interest(Tout, setpoint)
+    Tout = Tout[starting_idx:]
+    period = calculate_period(Tout, 10)
     print(period)
-    print(check_oscillation_stability(roi, 100))
+    print(check_oscillation_stability(Tout, int(period)*10))
     
 
 

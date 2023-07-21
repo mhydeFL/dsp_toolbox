@@ -15,6 +15,9 @@ DAMPED = -1
 MIN_WINDOWS = 4
 
 
+def find_region_of_interest(data, threshold):
+    return np.argmax(data>threshold)
+
 def calculate_period(data, sampling_freq_Hz):
     """
 
@@ -48,14 +51,17 @@ def check_oscillation_stability(data, window_size, tol=0.2):
     if num_windows < MIN_WINDOWS:
         raise Exception('Not enough data or window_size too large.')
 
-    for i in range(num_windows):
+    # Skip the first window since it would include the overshoot
+    for i in range(1, num_windows):
         windowed_data = data[i*window_size:(i+1)*window_size]
         amplitude = np.absolute(
             (np.max(windowed_data) - np.min(windowed_data)) / 2
         )
         amplitudes.append(amplitude)
     print(f'amplitudes: {amplitudes}')
-    amplitude_diff = amplitudes[1] - amplitudes[0]
+    if amplitudes[0] < tol:
+        return DAMPED
+    amplitude_diff = amplitudes[-1] - amplitudes[0]
     if amplitude_diff > tol:
         return UNSTABLE
     elif amplitude_diff < -tol:
