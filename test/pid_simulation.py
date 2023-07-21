@@ -73,7 +73,7 @@ def main():
     Tout = np.zeros(N+2) # Initialization the Tout vector
     Tout[0] = 20 # Initial Vaue
     # PI Controller Settings
-    Kp = 1
+    Kp = 5
     Ti = 30
     r = 28 # Reference value [degC]
     e = np.zeros(N+2) # Initialization
@@ -83,7 +83,8 @@ def main():
     for k in range(N+1):
         # Controller
         e[k] = r - Tout[k]
-        u[k] = u[k-1] + Kp*(e[k] - e[k-1]) + (Kp/Ti)*e[k] #PI Controller
+        #u[k] = u[k-1] + Kp*(e[k] - e[k-1]) + (Kp/Ti)*e[k] #PI Controller
+        u[k] = Kp*(e[k])
         if u[k]>5:
             u[k] = 5
         # Process Model
