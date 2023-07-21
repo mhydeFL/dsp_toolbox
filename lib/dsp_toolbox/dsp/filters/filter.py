@@ -19,7 +19,7 @@ class BaseFilter(ABC, Generic[InputType, OutputType]):
     def reset(self) -> None:
         raise RuntimeError("Can't call base filter")
     
-    @abstractmethod
     @property
+    @abstractmethod
     def is_initialized(self) -> bool:
         raise RuntimeError("Can't call base filter")

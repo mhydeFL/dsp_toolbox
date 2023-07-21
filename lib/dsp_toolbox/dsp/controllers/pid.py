@@ -2,13 +2,13 @@ import logging
 import time
 from typing import cast, Optional
 
-from dsp_toolbox.dsp.controllers.controller import (
-    BaseController,
+from dsp_toolbox.dsp.types import(
     InputType,
     OutputType,
     TimeType,
     Limits
 )
+from dsp_toolbox.dsp.controllers.controller import BaseController
 
 class PIDController(BaseController[InputType, OutputType, TimeType]):
 
