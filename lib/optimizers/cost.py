@@ -1,13 +1,15 @@
-from typing import Iterable, Any
+from typing import Iterable
 import numpy as np
+
+from dsp.types import T
 
 
 def PIDCost(
     error_weight: float,
     command_weight: float,
-    setpoint: Iterable[Any],
-    process_value: Iterable[Any],
-    output_value: Iterable[Any]
+    setpoint: Iterable[T],
+    process_value: Iterable[T],
+    output_value: Iterable[T]
 ) -> float:
     """
     Simple cost function to minimize composed of the sum of the setpoint error, the sum of the
