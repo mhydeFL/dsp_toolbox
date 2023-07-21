@@ -1,7 +1,7 @@
 from typing import Iterable
 import numpy as np
 
-from dsp.types import T
+from dsp_toolbox.dsp.types import T
 
 
 def PIDCost(

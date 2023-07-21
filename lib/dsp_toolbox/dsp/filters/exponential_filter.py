@@ -1,11 +1,11 @@
 from typing import Optional
 
-from dsp.types import (
+from dsp_toolbox.dsp.types import (
     InputType,
     OutputType,
     T
 )
-from dsp.filters.filter import BaseFilter
+from dsp_toolbox.dsp.filters.filter import BaseFilter
 
 
 class ExponentialFilter(BaseFilter[InputType, OutputType]):

@@ -1,5 +1,4 @@
-import numpy as np
-from optimizers.algorithms import BinaryHalf, BinarySearch
+from dsp_toolbox.optimization.algorithms import BinaryHalf, BinarySearch
 
 
 def test_binary_search():

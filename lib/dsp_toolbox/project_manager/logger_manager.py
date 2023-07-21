@@ -3,7 +3,7 @@ import logging
 import datetime
 from logging import handlers
 
-from project_manager.recursive_namespace import RecursiveNamespace
+from dsp_toolbox.project_manager.recursive_namespace import RecursiveNamespace
 
 
 class MyFormatter(logging.Formatter):

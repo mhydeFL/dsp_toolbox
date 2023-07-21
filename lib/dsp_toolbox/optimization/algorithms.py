@@ -1,7 +1,7 @@
 import numpy as np
 from enum import IntEnum, unique
 
-from dsp.types import T
+from dsp_toolbox.dsp.types import T
 
 
 @unique

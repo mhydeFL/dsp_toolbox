@@ -1,5 +1,5 @@
 import yaml
-from project_manager.recursive_namespace import RecursiveNamespace
+from dsp_toolbox.project_manager.recursive_namespace import RecursiveNamespace
 
 
 class Config(RecursiveNamespace):

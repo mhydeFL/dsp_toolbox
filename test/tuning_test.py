@@ -1,4 +1,4 @@
-from optimizers.heuristics import ZNTuning
+from dsp_toolbox.optimization.heuristics import ZNTuning
 
 
 def test_controller_options():

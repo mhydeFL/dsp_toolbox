@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Generic
 
-from dsp.types import (
+from dsp_toolbox.dsp.types import (
     InputType,
     OutputType
 )

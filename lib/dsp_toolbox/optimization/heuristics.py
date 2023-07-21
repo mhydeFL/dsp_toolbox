@@ -1,7 +1,7 @@
 import logging
 from typing import Optional
 
-from dsp.types import PIDGains, T
+from dsp_toolbox.dsp.types import PIDGains, T
 
 
 logging.basicConfig(level=logging.DEBUG)
