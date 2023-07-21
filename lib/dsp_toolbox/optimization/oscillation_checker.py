@@ -22,7 +22,7 @@ def calculate_period(data, sampling_freq_Hz):
     fourier_transform = fft(data)
     num_points = len(data)
     # crop to exclude sampling frequency
-    fourier_transform = fourier_transform[range(int(num_points/2))]
+    fourier_transform = fourier_transform[range(int(num_points/2))][1:]
 
     total_time = num_points / sampling_freq_Hz
     frequencies = np.arange(int(num_points / 2)) / total_time
@@ -48,7 +48,7 @@ def check_oscillation_stability(data, window_size, tol=0.2):
     if num_windows < MIN_WINDOWS:
         raise Exception('Not enough data or window_size too large.')
 
-    for i in num_windows:
+    for i in range(int(num_windows)):
         windowed_data = data[i*window_size:(i+1)*window_size]
         amplitude = np.absolute(
             (np.max(windowed_data) - np.min(windowed_data)) / 2

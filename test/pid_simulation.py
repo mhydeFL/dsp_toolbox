@@ -2,6 +2,7 @@ from dsp_toolbox.dsp.types import T
 from dsp_toolbox.dsp.controllers.pid import PIDController
 from dsp_toolbox.dsp.filters.exponential_filter import ExponentialFilter
 
+import numpy as np
 import matplotlib.pyplot as plt
 
 
@@ -9,15 +10,13 @@ class TemperatureController:
     def __init__(
         self,
         controller: PIDController,
-        filter: ExponentialFilter,
         update_interval_s: T
     ) -> None:
         self.controller = controller
-        self.filter = filter
         self.update_interval_s = update_interval_s
         
         self.setpoint_C = None
-        self.filtered_temperature_C = None
+        self.temperature_C = None
         self.time_of_last_update = 0.0
         
     def setpoint(self, setpoint_C: T) -> None:
@@ -29,19 +28,18 @@ class TemperatureController:
         now = self.time_of_last_update + self.update_interval_s
 
         self.time_of_last_update = now
-        self.filtered_temperature_C = self.filter.update(temperature_C)
-        return self.controller.update(self.filtered_temperature_C, self.setpoint_C)
+        return self.controller.update(temperature_C, self.setpoint_C)
     
 
 class HeaterModel:
     def __init__(
         self,
-        heater_gain: T = 3.5,
-        time_constant: T = 22,
-        time_delay: T = 2,
-        ambient_temperature: T = 21.5,
-        sample_time = 0.1,
-        initial_temp: T = 0.0
+        heater_gain: T,
+        time_constant: T,
+        time_delay: T,
+        ambient_temperature: T,
+        sample_time,
+        initial_temp
     ) -> None:
         self.Kh = heater_gain
         self.theta_t = time_constant
@@ -58,40 +56,47 @@ class HeaterModel:
 
 
 def main():
-    # Air Heater System
-    import numpy as np
-    import matplotlib.pyplot as plt
-    # Model Parameters
+    from dsp_toolbox.optimization.oscillation_checker import calculate_period, check_oscillation_stability
+    pid = PIDController(
+        kp=5.0,
+        ki=0.0,
+        kd=0.0,
+        output_limits=[0, 5]
+    )
+    controller = TemperatureController(
+        controller=pid,
+        update_interval_s=0.1
+    )
+    controller.setpoint(28)
+    
     Kh = 3.5
     theta_t = 22
     theta_d = 2
     Tenv = 21.5
-    # Simulation Parameters
-    Ts = 0.1 # Sampling Time
-    Tstop = 200 # End of Simulation Time
-    N = int(Tstop/Ts) # Simulation length
-    Tout = np.zeros(N+2) # Initialization the Tout vector
-    Tout[0] = 20 # Initial Vaue
-    # PI Controller Settings
-    Kp = 5
-    Ti = 30
-    r = 28 # Reference value [degC]
-    e = np.zeros(N+2) # Initialization
-    u = np.zeros(N+2) # Initialization
-    t = np.arange(0,Tstop+2*Ts,Ts) #Create the Time Series
-    # Simulation
+    Ts = 0.1
+    Tstop = 200
+    N = int(Tstop/Ts)
+    Tout = np.zeros(N+2)
+    Tout[0] = 20
+    e = np.zeros(N+2)
+    u = np.zeros(N+2)
+    t = np.arange(0,Tstop+2*Ts,Ts)
     for k in range(N+1):
-        # Controller
-        e[k] = r - Tout[k]
-        #u[k] = u[k-1] + Kp*(e[k] - e[k-1]) + (Kp/Ti)*e[k] #PI Controller
-        u[k] = Kp*(e[k])
-        if u[k]>5:
-            u[k] = 5
-        # Process Model
+        print(Tout[k])
+        e[k] = controller.setpoint_C - Tout[k]
+        u[k] = controller.update(Tout[k], )
         Tout[k+1] = Tout[k] + (Ts/theta_t) * (-Tout[k] + Kh*u[int(k-theta_d/Ts)] + Tenv)
         print("t = %2.1f, u = %3.2f, Tout = %3.1f" %(t[k], u[k], Tout[k+1]))
+    
+    roi = Tout[1000:]
+    
     plt.plot(Tout)
     plt.show()
+    
+    period = calculate_period(roi, 10)
+    print(period)
+    print(check_oscillation_stability(roi, 100))
+    
 
 
 if __name__ == "__main__":
