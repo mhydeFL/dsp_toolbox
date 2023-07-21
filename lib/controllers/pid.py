@@ -11,19 +11,6 @@ from controllers.controller import (
 )
 
 class PIDController(BaseController[InputType, OutputType, TimeType]):
-    """A PID controller based on Common/General/DSP/Controllers/PIDController.h
-
-    Example usage:
-        from formlabs.hardware.controllers.pid import PIDController
-        from formlabs.units import DutyCycle, Temperature_C, Time_s
-
-        # Create a controller that takes in temperatures and outputs duty cycles
-        controller = PID[Temperature, DutyCycle, Time_s](...)
-
-        setpoint_C = Temperature(25.0)
-        temperature_C = sensor.read_temperature()
-        duty_cycle = controller(reading_C, setpoint_C)
-    """
 
     def __init__(
         self,
@@ -35,19 +22,6 @@ class PIDController(BaseController[InputType, OutputType, TimeType]):
         i_limits: Optional[Limits[OutputType]] = None,
         d_limits: Optional[Limits[OutputType]] = None,
     ) -> None:
-        """
-        Arguments:
-            kp: The coefficient for the proportional term
-            ki: The coefficient for the integral term
-            kd: The coefficient for the differential term
-            output_limits: A (low, high) pair representing the allowable output range
-            p_limits: A (low, high) pair representing the allowable range for the
-                proportional term. By default, it is not clamped.
-            i_limits: A (low, high) pair representing the allowable range for the
-                integral term. By default, it is not clamped.
-            d_limits: A (low, high) pair representing the allowable range for the
-                differential term. By default, it is not clamped.
-        """
         self.kp = kp
         self.ki = ki
         self.kd = kd
@@ -58,8 +32,8 @@ class PIDController(BaseController[InputType, OutputType, TimeType]):
         self.reset()
 
     def reset(self) -> None:
-        self.last_error = None  # type: Optional[InputType]
-        self.last_time = None  # type: Optional[TimeType]
+        self.last_error = None
+        self.last_time = None
         self.integrated_error = 0.0
         
     def set_kp(self, kp: float):

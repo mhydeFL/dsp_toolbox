@@ -10,16 +10,14 @@ Limits = Tuple[T, T]
 
 
 class BaseController(ABC, Generic[InputType, OutputType, TimeType]):
-    """An abstract base class for controllers to implement
-
-    This is modeled after Common/General/DSP/Controllers/I_Controller.h.
-
-    See the documentation for child classes for example usage.
+    """
+    An abstract base class for controllers to implement
     """
 
     @abstractmethod
     def reset(self) -> None:
-        """Reset the controller to its initial state
+        """
+        Reset the controller to its initial state
 
         The previous and summed errors are cleared. When the next update arrives, the
         controller will act as if it was freshly constructed.
@@ -33,7 +31,8 @@ class BaseController(ABC, Generic[InputType, OutputType, TimeType]):
         setpoint: InputType,
         t: Optional[TimeType] = None,
     ) -> OutputType:
-        """Compute a new output given a fresh input and the set point
+        """
+        Compute a new output given a fresh input and the set point
 
         t represents the current time. If not specified, time.monotonic() is used.
         """
@@ -50,7 +49,8 @@ class BaseController(ABC, Generic[InputType, OutputType, TimeType]):
 
     @staticmethod
     def limit(value: T, limits: Optional[Limits[T]]) -> T:
-        """Clamp the value to an optional range
+        """
+        Clamp the value to an optional range
 
         If limits is None, the input value is returned unchanged.
         Otherwise, limits must be a (low, high) pair defining the allowble range that
