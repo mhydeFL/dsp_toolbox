@@ -1,12 +1,13 @@
 from abc import ABC, abstractmethod
-from typing import Generic, Optional, Tuple, TypeVar
+from typing import Generic, Optional
 
-
-InputType = TypeVar("InputType", bound=float)
-OutputType = TypeVar("OutputType", bound=float)
-TimeType = TypeVar("TimeType", bound=float)
-T = TypeVar("T", bound=float)
-Limits = Tuple[T, T]
+from dsp.types import (
+    InputType,
+    OutputType,
+    TimeType,
+    Limits,
+    T
+)
 
 
 class BaseController(ABC, Generic[InputType, OutputType, TimeType]):

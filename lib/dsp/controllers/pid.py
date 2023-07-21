@@ -2,7 +2,7 @@ import logging
 import time
 from typing import cast, Optional
 
-from controllers.controller import (
+from dsp.controllers.controller import (
     BaseController,
     InputType,
     OutputType,

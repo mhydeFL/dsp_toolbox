@@ -10,7 +10,7 @@ setup(
     author_email="mikhail.hyde@formlabs.com",
     url="https://github.com/Formlabs/mordor/tree/master/python/lib",
     packages= [
-        "controllers",
+        "dsp",
         "optimizers",
         "project_manager"
     ]
