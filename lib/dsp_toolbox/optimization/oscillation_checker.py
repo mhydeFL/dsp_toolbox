@@ -1,19 +1,68 @@
 from numpy.fft import fft
 import numpy as np
 import matplotlib.pyplot as plt
-from dsp_toolbox.optimization.freqency_generator import generate_waveform
+from dsp_toolbox.optimization.frequency_generator import generate_waveform
 from dsp_toolbox.data.database import Database
 from dsp_toolbox.dsp.filters.median_filter import MedianFilter
 from dsp_toolbox.dsp.filters.exponential_filter import ExponentialFilter
 
 
-def check_oscillation_stability(data, window):
-    """
-    Checks for a stable oscillation by taking the Fourier Transform and looking for a single frequency spike
-    data: 1D array of data
+UNSTABLE = 1
+STABLE = 0
+DAMPED = -1
 
-    return: True or False
+
+MIN_WINDOWS = 4
+
+
+def calculate_period(data, sampling_freq_Hz):
     """
+
+    """
+    fourier_transform = fft(data)
+    num_points = len(data)
+    # crop to exclude sampling frequency
+    fourier_transform = fourier_transform[range(int(num_points/2))]
+
+    total_time = num_points / sampling_freq_Hz
+    frequencies = np.arange(int(num_points / 2)) / total_time
+
+    peak_frequency = frequencies[np.argmax(fourier_transform)]
+    period = 1.0 / peak_frequency
+    return period
+
+
+def check_oscillation_stability(data, window_size, tol=0.2):
+    """
+    Checks if the response has a unstable oscillation, damped oscillation, or stable oscillation.
+    data: 1D array of oscillations. any ramp-up should be cropped out
+    window_size: should be at least the period of the oscillation
+    tolerance: how much amplitude difference is considered stable
+
+    returns UNSTABLE, STABLE, or DAMPED
+    """
+
+    amplitudes = []
+    num_windows = np.floor(len(data) / window_size)
+
+    if num_windows < MIN_WINDOWS:
+        raise Exception('Not enough data or window_size too large.')
+
+    for i in num_windows:
+        windowed_data = data[i*window_size:(i+1)*window_size]
+        amplitude = np.absolute(
+            (np.max(windowed_data) - np.min(windowed_data)) / 2
+        )
+        amplitudes.append(amplitude)
+    print(f'amplitudes: {amplitudes}')
+    amplitude_diff = np.diff(amplitudes)
+    average_amplitude_diff = np.mean(amplitude_diff)
+    if average_amplitude_diff > tol:
+        return UNSTABLE
+    elif average_amplitude_diff < -tol:
+        return DAMPED
+    else:
+        return STABLE
 
 
 def get_temp_from_sqlite(filepath: str) -> np.array:
