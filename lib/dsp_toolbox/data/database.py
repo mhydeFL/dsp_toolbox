@@ -60,7 +60,7 @@ class Database:
         with sqlite3.connect(self.filepath) as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-            tables = cursor.fetchall()
+            tables = [t[0] for t in cursor.fetchall()]
             if self.table_name not in tables:
                 logging.error("Could not find table name")
                 self.database = pd.DataFrame()
