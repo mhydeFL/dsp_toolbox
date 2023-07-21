@@ -3,4 +3,4 @@ scipy
 pyyaml
 matplotlib
 pandas
-sqlite3
+pysqlite3
