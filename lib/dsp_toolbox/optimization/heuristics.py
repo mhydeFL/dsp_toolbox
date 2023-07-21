@@ -1,5 +1,6 @@
 import logging
 from typing import Optional
+import numpy as np
 
 from dsp_toolbox.dsp.types import PIDGains, T
 
@@ -79,8 +80,32 @@ class CCTuning:
     """
     Cohen-Coon method of PID tuning
     """
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        A: T,
+        B: T,
+        t0: T,
+        t2: T,
+        t3: T,
+    ) -> None:
+        self.A: T = A
+        self.B: T = B
+        self.t0: T = t0
+        self.t2: T = t2
+        self.t3: T = t3
+        
+        self.t1: T = None
+        self.tau: T = None
+        self.tau_del: T = None
+        self.K: T = None
+        self.r: T = None
+    
+    def __call__(self) -> PIDGains:
         pass
     
-    def evaluate(self) -> PIDGains:
-        pass
+    def generate_process_params(self) -> None:
+        self.t1 = (self.t2 - self.t3*np.log(2)) / (1 - np.log(2))
+        self.tau = self.t3 - self.t1
+        self.tau_del = self.t1 - self.t0
+        self.K = self.B / self.A
+        self.r = self.tau_del / self.tau
