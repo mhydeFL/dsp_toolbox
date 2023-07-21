@@ -2,11 +2,11 @@ from typing import Iterable, Any
 import numpy as np
 
 
-def SimpleCost(
+def PIDCost(
     error_weight: float,
     command_weight: float,
     setpoint: Iterable[Any],
-    proccess_value: Iterable[Any],
+    process_value: Iterable[Any],
     output_value: Iterable[Any]
 ) -> float:
     """
@@ -15,7 +15,7 @@ def SimpleCost(
     
     J = sum((stp[i] - v[i])^2*t[i])*We + sum((command[i+1] - command[i])^2)*Wu + command[0]^2*Wu
     """
-    error_term = error_weight * np.sum(np.square(setpoint - proccess_value))
+    error_term = error_weight * np.sum(np.square(setpoint - process_value))
     command_term = command_weight * np.sum(np.square(np.diff(output_value)))
     bias_term = command_weight * output_value[0]**2
     
