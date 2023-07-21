@@ -41,7 +41,6 @@ class HeaterModel:
         time_delay: T = 2,
         ambient_temperature: T = 21.5,
         sample_time = 0.1,
-        step_response: T = 1,
         initial_temp: T = 0.0
     ) -> None:
         self.Kh = heater_gain
@@ -49,34 +48,49 @@ class HeaterModel:
         self.theta_d = time_delay
         self.Tenv = ambient_temperature
         self.Ts = sample_time
-        self.uk = step_response
+        self.initial_temp = initial_temp
         self.prev_temp = initial_temp
 
-    def update(self) -> T:
-        temp = self.prev_temp + (self.Ts/self.theta_t) * (-self.prev_temp + self.Kh*self.uk + self.Tenv)
+    def update(self, u: T) -> T:
+        temp = self.prev_temp + (self.Ts/self.theta_t) * (-self.prev_temp + self.Kh*u + self.Tenv)
         self.prev_temp = temp
         return temp
 
 
 def main():
-    exp_filter = ExponentialFilter(0.3)
-    controller = PIDController(
-        kp=1.0,
-        ki=0.0,
-        kd=0.0,
-        output_limits=[0,100]
-    )
-    
-    temp_controller = TemperatureController(
-        controller=controller,
-        filter=exp_filter,
-        update_interval_s=1
-    )
-    
-    heater = HeaterModel()
-    
-    temps = [heater.update() for _ in range(1000)]
-    plt.plot(temps)
+    # Air Heater System
+    import numpy as np
+    import matplotlib.pyplot as plt
+    # Model Parameters
+    Kh = 3.5
+    theta_t = 22
+    theta_d = 2
+    Tenv = 21.5
+    # Simulation Parameters
+    Ts = 0.1 # Sampling Time
+    Tstop = 200 # End of Simulation Time
+    N = int(Tstop/Ts) # Simulation length
+    Tout = np.zeros(N+2) # Initialization the Tout vector
+    Tout[0] = 20 # Initial Vaue
+    # PI Controller Settings
+    Kp = 5
+    Ti = 30
+    r = 28 # Reference value [degC]
+    e = np.zeros(N+2) # Initialization
+    u = np.zeros(N+2) # Initialization
+    t = np.arange(0,Tstop+2*Ts,Ts) #Create the Time Series
+    # Simulation
+    for k in range(N+1):
+        # Controller
+        e[k] = r - Tout[k]
+        #u[k] = u[k-1] + Kp*(e[k] - e[k-1]) + (Kp/Ti)*e[k] #PI Controller
+        u[k] = Kp*(e[k])
+        if u[k]>5:
+            u[k] = 5
+        # Process Model
+        Tout[k+1] = Tout[k] + (Ts/theta_t) * (-Tout[k] + Kh*u[int(k-theta_d/Ts)] + Tenv)
+        print("t = %2.1f, u = %3.2f, Tout = %3.1f" %(t[k], u[k], Tout[k+1]))
+    plt.plot(Tout)
     plt.show()
 
 
