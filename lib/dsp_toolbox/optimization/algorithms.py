@@ -24,13 +24,13 @@ class BinarySearch:
             self.high_idx: int = self.data.size()
 
     def step(self, reduce: BinaryHalf) -> T:
-        if reduce == BinaryHalf.INIT:
-            pass
-        if reduce == BinaryHalf.LOWER:
-            self.high_idx = self.mid_idx
-        if reduce == BinaryHalf.UPPER:
-            self.low_idx = self.mid_idx
-
+        match reduce:
+            case BinaryHalf.INIT:
+                pass
+            case BinaryHalf.LOWER:
+                self.high_idx = self.mid_idx
+            case BinaryHalf.UPPER:
+                self.low_idx = self.mid_idx
         self.mid_idx = (self.low_idx + self.high_idx) // 2
         return self.data[self.mid_idx]
     

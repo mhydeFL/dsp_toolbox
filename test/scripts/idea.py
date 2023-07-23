@@ -69,11 +69,12 @@ def search(
     u = np.zeros(N+2)
     for k in range(N+1):
         e[k] = controller.setpoint_C - Tout[k]
-        u[k] = controller.update(Tout[k], )
+        u[k] = controller.update(Tout[k])
         Tout[k+1] = Tout[k] + (Ts/theta_t) * (-Tout[k] + Kh*u[int(k-theta_d/Ts)] + Tenv)
     
     if display:
-        plt.plot(Tout)
+        plt.plot(Tout, label=f"Kp:{kp} Ki:{ki} Kd:{kd}")
+        plt.legend()
         plt.show()
     
     starting_idx = find_region_of_interest(Tout, setpoint)
@@ -85,12 +86,14 @@ def search(
 
 def main():
     bs = BinarySearch()
-    bs.generate_data(4.0, 6.0, 2000)
+    bs.generate_data(1.0, 6.0, 2000)
     
     result = -10
     response = BinaryHalf.INIT
     while result != 0:
         ku = bs.step(response)
+        if ku is None:
+            break
         result, period = search(ku)
         
         if result == 1:
@@ -101,7 +104,7 @@ def main():
     print(ku)
     gains = ZNTuning(ku, period, "PI")()
     
-    search(gains.Kp, display=True)
+    search(gains.Kp, gains.Ki, gains.Kd, display=True)
     
 
 if __name__ == "__main__":
