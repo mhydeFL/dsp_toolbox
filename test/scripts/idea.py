@@ -1,16 +1,17 @@
+import logging
 import numpy as np
 import matplotlib.pyplot as plt
 
 from dsp_toolbox.dsp.types import T
 from dsp_toolbox.optimization.heuristics import ZNTuning
 from dsp_toolbox.dsp.controllers.pid import PIDController
-from dsp_toolbox.optimization.algorithms import (
+from dsp_toolbox.optimization.binary_search import (
     BinarySearch,
     BinaryHalf,
+)
+from dsp_toolbox.optimization.periodic_analyzer import (
     PeriodicCharacteristic,
-    find_region_of_interest,
-    calculate_period,
-    check_oscillation_stability
+    PeriodicAnalyzer
 )
 
 
@@ -78,23 +79,24 @@ def search(
         plt.plot(Tout, label=f"Kp:{kp} Ki:{ki} Kd:{kd}")
         plt.legend()
         plt.show()
+   
+    analyzer = PeriodicAnalyzer(
+        data=Tout,
+        sampling_frequency_Hz=10,
+        roi_threshold=setpoint
+    )
+    period = analyzer.calculate_period()
     
-    starting_idx = find_region_of_interest(Tout, setpoint)
-    Tout = Tout[starting_idx:]
-    period = calculate_period(Tout, 10)
-    
-    return (check_oscillation_stability(Tout, int(period)*10), period)
+    return (analyzer.check_oscillation_stability(0.2, int(period)*10), period)
     
 
 def main():
     bs = BinarySearch()
-    bs.generate_data(3.0, 10.0, 2000)
-    
-    result = -10
+    bs.generate_data(1.0, 3.0, 2000)
+
     response = BinaryHalf.INIT
-    while True:
+    while bs.data_available:
         ku = bs.step(response)
-        print(ku)
         if ku is None:
             break
         result, period = search(ku)
@@ -107,8 +109,11 @@ def main():
             case PeriodicCharacteristic.UNSTABLE:
                 response = BinaryHalf.LOWER
 
-    gains = ZNTuning(ku, period, "PI")()
-    search(gains.Kp, gains.Ki, gains.Kd, display=True)
+    if result == PeriodicCharacteristic.STABLE:
+        gains = ZNTuning(ku, period, "PI")()
+        search(gains.Kp, gains.Ki, gains.Kd, display=True)
+    else:
+        logging.error("Could not find ultimate gain")
     
 
 if __name__ == "__main__":
