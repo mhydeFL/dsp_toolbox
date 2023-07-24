@@ -6,7 +6,7 @@ from dsp_toolbox.dsp.types import T
 from dsp_toolbox.optimization.heuristics import ZNTuning
 from dsp_toolbox.dsp.controllers.pid import PIDController
 from dsp_toolbox.optimization.binary_search import (
-    BinarySearch,
+    UBLBBinarySearch,
     BinaryHalf,
 )
 from dsp_toolbox.optimization.periodic_analyzer import (
@@ -73,12 +73,7 @@ def search(
     for k in range(N+1):
         e[k] = controller.setpoint_C - Tout[k]
         u[k] = controller.update(Tout[k])
-        Tout[k+1] = Tout[k] + (Ts/theta_t) * (-Tout[k] + Kh*u[int(k-theta_d/Ts)] + Tenv)
-    
-    if display:
-        plt.plot(Tout, label=f"Kp:{kp} Ki:{ki} Kd:{kd}")
-        plt.legend()
-        plt.show()
+        Tout[k+1] = Tout[k] + (Ts/theta_t) * (-Tout[k] + Kh*u[int(k-theta_d/Ts)] + Tenv)    
    
     analyzer = PeriodicAnalyzer(
         data=Tout,
@@ -87,30 +82,38 @@ def search(
     )
     period = analyzer.calculate_period()
     
+    if display:
+        plt.plot(Tout, label=f"Kp:{round(kp, 3)} Ki:{round(ki, 3)} Kd:{round(kd, 3)}")
+        plt.legend()
+        plt.show()
+
     return (analyzer.check_oscillation_stability(0.2, int(period)*10), period)
     
 
 def main():
-    bs = BinarySearch()
-    bs.generate_data(1.0, 3.0, 2000)
-
+    bs = UBLBBinarySearch()
+    bs.generate_data(1.0, 100.0, 2000)
     response = BinaryHalf.INIT
+    
+    iterations = 0
     while bs.data_available:
-        ku = bs.step(response)
-        if ku is None:
-            break
-        result, period = search(ku)
-        
-        match result:
+        ku_l, ku_h = bs.step(response)
+        result_l, _ = search(ku_l)
+        result_h, period_h = search(ku_h)
+        match result_h:
             case PeriodicCharacteristic.DAMPED:
                 response = BinaryHalf.UPPER
             case PeriodicCharacteristic.STABLE:
-                break
+                if result_l == PeriodicCharacteristic.DAMPED and result_h == PeriodicCharacteristic.STABLE:
+                    break
+                response = BinaryHalf.LOWER
             case PeriodicCharacteristic.UNSTABLE:
                 response = BinaryHalf.LOWER
+        iterations += 1
 
-    if result == PeriodicCharacteristic.STABLE:
-        gains = ZNTuning(ku, period, "PI")()
+    logging.info(f"Solution found in {iterations} iterations")
+    if result_h == PeriodicCharacteristic.STABLE:
+        gains = ZNTuning(ku_h, period_h, "PI")()
         search(gains.Kp, gains.Ki, gains.Kd, display=True)
     else:
         logging.error("Could not find ultimate gain")
