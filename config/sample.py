@@ -1,4 +1,5 @@
 import os
+import logging
 from dsp_toolbox.project_manager.config import Config
 
 
@@ -20,10 +21,10 @@ def main():
     ki = controller.initial_gains.ki
     kd = controller.initial_gains.kd
     
-    print(f"Kp: {kp} Ki: {ki} Kd: {kd}")
+    logging.info(f"Kp: {kp} Ki: {ki} Kd: {kd}")
     
-    print(log)
-    print(plotting)
+    logging.info(log)
+    logging.info(plotting)
 
 
 if __name__ == "__main__":

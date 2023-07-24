@@ -1,3 +1,4 @@
+import logging
 from dsp_toolbox.optimization.binary_search import BinaryHalf, BinarySearch
 
 
@@ -9,7 +10,7 @@ def test_binary_search():
     val = bs.step(BinaryHalf.INIT)
     
     for _ in range(len(bs.data)):
-        print(val)
+        logging.info(val)
         if val == target:
             return
         if val > target:
