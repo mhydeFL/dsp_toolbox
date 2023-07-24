@@ -1,4 +1,5 @@
 import logging
+from typing import Tuple
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -40,7 +41,7 @@ class TemperatureController:
         return self.controller.update(temperature_C, self.setpoint_C)
 
 
-def search(
+def test(
     kp: float,
     ki: float = 0,
     kd: float = 0,
@@ -88,23 +89,26 @@ def search(
         plt.show()
 
     return (analyzer.check_oscillation_stability(0.2, int(period)*10), period)
-    
 
-def main():
+
+def search() -> Tuple[PeriodicCharacteristic, T, T]:
     bs = UBLBBinarySearch()
-    bs.generate_data(1.0, 100.0, 2000)
+    bs.generate_data(1.0, 25.0, 101)
     response = BinaryHalf.INIT
     
     iterations = 0
     while bs.data_available:
         ku_l, ku_h = bs.step(response)
-        result_l, _ = search(ku_l)
-        result_h, period_h = search(ku_h)
+        result_l, _ = test(ku_l)
+        result_h, period_h = test(ku_h)
         match result_h:
             case PeriodicCharacteristic.DAMPED:
                 response = BinaryHalf.UPPER
             case PeriodicCharacteristic.STABLE:
-                if result_l == PeriodicCharacteristic.DAMPED and result_h == PeriodicCharacteristic.STABLE:
+                lower_is_damped = result_l == PeriodicCharacteristic.DAMPED
+                upper_is_stable = result_h == PeriodicCharacteristic.STABLE
+                is_marginal = lower_is_damped and upper_is_stable
+                if is_marginal:
                     break
                 response = BinaryHalf.LOWER
             case PeriodicCharacteristic.UNSTABLE:
@@ -112,9 +116,14 @@ def main():
         iterations += 1
 
     logging.info(f"Solution found in {iterations} iterations")
-    if result_h == PeriodicCharacteristic.STABLE:
-        gains = ZNTuning(ku_h, period_h, "PI")()
-        search(gains.Kp, gains.Ki, gains.Kd, display=True)
+    return result_h, ku_h, period_h
+ 
+
+def main():
+    result, ku, period = search()
+    if result == PeriodicCharacteristic.STABLE:
+        gains = ZNTuning(ku, period, "PI")()
+        test(gains.Kp, gains.Ki, gains.Kd, display=True)
     else:
         logging.error("Could not find ultimate gain")
     
