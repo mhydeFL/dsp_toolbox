@@ -8,19 +8,19 @@ class FrequencyGenerator:
     def __init__(
         self,
         amplitude_func,
-        sampling_rate: T,
+        sample_rate: T,
         frequency_Hz: T,
         duration_s: T,
-        noise_amplitude: T = 0
+        noise_magnitude: T = 0
     ) -> None:
         self.amplitude_func = amplitude_func
-        self.sampling_rate = sampling_rate
+        self.sample_rate = sample_rate
         self.frequency_Hz = frequency_Hz
         self.duration_s = duration_s
-        self.noise_amplitude = noise_amplitude
+        self.noise_magnitude = noise_magnitude
 
     def generate_waveform(self) -> np.array:
-        num_samples = int(self.duration_s * self.sampling_rate)
+        num_samples = int(self.duration_s * self.sample_rate)
         time = np.linspace(0, self.duration_s, num_samples)
         waveform = self.amplitude_func(time) * np.sin(2 * np.pi * self.frequency_Hz * time)
         waveform = self.generate_noise(waveform)
@@ -30,41 +30,5 @@ class FrequencyGenerator:
         self.amplitude_func = func
         
     def generate_noise(self, waveform: np.array) -> np.array:
-        noise = self.noise_amplitude * np.random.randn(len(waveform))
+        noise = self.noise_magnitude * np.random.randn(len(waveform))
         return waveform + noise
-
-
-def default_amplitude_func(t):
-    return 3 + 0.25*t
-
-
-def generate_waveform(
-        amplitude_func=default_amplitude_func,
-        sampling_rate=100,
-        frequency_Hz=1,
-        duration_s=10,
-        noise_amplitude=0.3
-):
-    frequency_gen = FrequencyGenerator(
-        amplitude_func,
-        sampling_rate,
-        frequency_Hz,
-        duration_s,
-        noise_amplitude
-    )
-    return frequency_gen.generate_waveform()
-
-
-if __name__ == "__main__":
-    def amplitude_func(t):
-        return 3 + 0.25*t
-    waveform = generate_waveform(
-        amplitude_func=amplitude_func,
-        sampling_rate=100,
-        frequency_Hz=1,
-        duration_s=10,
-        noise_amplitude=0.3
-    )
-
-    plt.plot(waveform)
-    plt.show()
