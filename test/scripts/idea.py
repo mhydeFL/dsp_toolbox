@@ -4,11 +4,13 @@ import matplotlib.pyplot as plt
 from dsp_toolbox.dsp.types import T
 from dsp_toolbox.optimization.heuristics import ZNTuning
 from dsp_toolbox.dsp.controllers.pid import PIDController
-from dsp_toolbox.optimization.algorithms import BinarySearch, BinaryHalf
-from dsp_toolbox.optimization.oscillation_checker import (
-    check_oscillation_stability,
+from dsp_toolbox.optimization.algorithms import (
+    BinarySearch,
+    BinaryHalf,
+    PeriodicCharacteristic,
     find_region_of_interest,
-    calculate_period
+    calculate_period,
+    check_oscillation_stability
 )
 
 
@@ -86,24 +88,26 @@ def search(
 
 def main():
     bs = BinarySearch()
-    bs.generate_data(1.0, 6.0, 2000)
+    bs.generate_data(3.0, 10.0, 2000)
     
     result = -10
     response = BinaryHalf.INIT
-    while result != 0:
+    while True:
         ku = bs.step(response)
+        print(ku)
         if ku is None:
             break
         result, period = search(ku)
         
-        if result == 1:
-            response = BinaryHalf.LOWER
-        if result == -1:
-            response = BinaryHalf.UPPER
+        match result:
+            case PeriodicCharacteristic.DAMPED:
+                response = BinaryHalf.UPPER
+            case PeriodicCharacteristic.STABLE:
+                break
+            case PeriodicCharacteristic.UNSTABLE:
+                response = BinaryHalf.LOWER
 
-    print(ku)
     gains = ZNTuning(ku, period, "PI")()
-    
     search(gains.Kp, gains.Ki, gains.Kd, display=True)
     
 
