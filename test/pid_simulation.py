@@ -56,7 +56,7 @@ class HeaterModel:
 
 
 def main():
-    from dsp_toolbox.optimization.oscillation_checker import calculate_period, check_oscillation_stability, find_region_of_interest
+    from dsp_toolbox.optimization.algorithms import calculate_period, check_oscillation_stability, find_region_of_interest
     pid = PIDController(
         kp=4.2,
         ki=0.0,
