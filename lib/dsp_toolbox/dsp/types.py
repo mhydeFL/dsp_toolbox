@@ -4,6 +4,7 @@ from typing import TypeVar, Tuple, NamedTuple
 InputType = TypeVar("InputType", bound=float)
 OutputType = TypeVar("OutputType", bound=float)
 TimeType = TypeVar("TimeType", bound=float)
+FrequencyType = TypeVar("FrequencyType", bound=float)
 T = TypeVar("T", bound=float)
 Limits = Tuple[T, T]
 
