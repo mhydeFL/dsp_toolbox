@@ -69,10 +69,8 @@ def test(
     N = int(Tstop/Ts)
     Tout = np.zeros(N+2)
     Tout[0] = 20
-    e = np.zeros(N+2)
     u = np.zeros(N+2)
     for k in range(N+1):
-        e[k] = controller.setpoint_C - Tout[k]
         u[k] = controller.update(Tout[k])
         Tout[k+1] = Tout[k] + (Ts/theta_t) * (-Tout[k] + Kh*u[int(k-theta_d/Ts)] + Tenv)    
    
